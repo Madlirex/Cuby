@@ -15,6 +15,7 @@ public class Game : GameWindow
     private Shader _unlitShader;
     private Camera _camera = new();
     private GameObject _cube;
+    private GameObject _shadowCube;
 
     public static Vector4 LightColor;
     public static Vector3 LightPos;
@@ -26,10 +27,10 @@ public class Game : GameWindow
     private Vector2 _viewportPosition = Vector2.Zero;
     private Vector2 _rotVelocity = Vector2.Zero;
     private Vector2 _posVelocity = Vector2.Zero;
-    private float _friction = 0.99f;
+    private float _friction = 0.95f;
     private float _rotSensitivity = 1.0f;
     private float _dragSensitivity = 1f;
-    private float _restitution = 1f;
+    private float _restitution = 0.8f;
     
     private unsafe Cursor* _handCursor;
     private unsafe Cursor* _grabCursor;
@@ -143,6 +144,16 @@ public class Game : GameWindow
         {
             Position = new Vector3(2f, 2f, 0f)
         };
+        Transform shadowTransform = new Transform()
+        {
+            Position = transform.Position + new Vector3(0.06f, -0.06f, -0.02f),
+            Rotation = transform.Rotation,
+            Scale = transform.Scale * 1.04f
+        };
+
+        Material shadowMaterial = new Material(_unlitShader, null, new Vector4(0f, 0f, 0f, 0.5f));
+        _shadowCube = new GameObject(new MeshRenderer(mesh, shadowMaterial), shadowTransform);
+        
         LightPos = lightTransform.Position;
         LightColor = new Vector4(1f, 1f, 1f, 1f);
         _cube = new GameObject(meshRenderer, transform);
@@ -155,7 +166,7 @@ public class Game : GameWindow
         GameObject lightObject = new GameObject(lampRenderer, lightTransform);
         _litShader.SetVector3("lightPos", lightObject.Transform.Position);
         
-        _scene = [_cube, lightObject];
+        _scene = [_cube, lightObject, _shadowCube];
         GL.Enable(EnableCap.DepthTest);
         
         GL.Enable(EnableCap.Blend);
@@ -210,16 +221,24 @@ public class Game : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+        _shadowCube.Transform.Position = _cube.Transform.Position + new Vector3(0.06f, -0.06f, -0.02f);
+        _shadowCube.Transform.Rotation = _cube.Transform.Rotation;
+        
         _litShader.SetVector3("viewPos", _camera.Transform.Position);
         _litShader.SetVector3("lightPos", LightPos);
 
         Matrix4 view = _camera.GetViewMatrix();
         Matrix4 projection = _camera.GetPerspectiveMatrix();
 
-        foreach (GameObject gameObject in _scene)
-        {
-            gameObject.MeshRenderer.Draw(view, projection);
-        }
+        GL.DepthMask(false);
+        GL.Disable(EnableCap.DepthTest);
+
+        _shadowCube.MeshRenderer.Draw(view, projection);
+
+        GL.DepthMask(true);
+        GL.Enable(EnableCap.DepthTest);
+
+        _cube.MeshRenderer.Draw(view, projection);
         
         MouseState mouse = MouseState;
         int mouseX = (int)mouse.X;
