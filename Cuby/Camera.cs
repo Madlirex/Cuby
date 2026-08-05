@@ -39,7 +39,7 @@ public class Camera
     public float Fov
     {
         get => MathHelper.RadiansToDegrees(_fov);
-        set => _fov = MathHelper.DegreesToRadians(MathHelper.Clamp(value, 1f, 90f));
+        set => _fov = MathHelper.DegreesToRadians(MathHelper.Clamp(value, SettingsManager.Settings.MaxZoom, SettingsManager.Settings.MinZoom));
     }
 
     private float _yaw = -MathHelper.PiOver2;

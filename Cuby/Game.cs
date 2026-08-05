@@ -27,8 +27,6 @@ public class Game : GameWindow
     private Vector2 _viewportPosition = Vector2.Zero;
     private Vector2 _rotVelocity = Vector2.Zero;
     private Vector2 _posVelocity = Vector2.Zero;
-
-    private Settings _settings = SettingsSaver.Load();
     
     private unsafe Cursor* _handCursor;
     private unsafe Cursor* _grabCursor;
@@ -202,7 +200,7 @@ public class Game : GameWindow
     protected override unsafe void OnUnload()
     {
         base.OnUnload();
-        SettingsSaver.Save(_settings);
+        SettingsManager.Save(SettingsManager.Settings);
 
         CursorState = CursorState.Normal;
         
@@ -297,7 +295,7 @@ public class Game : GameWindow
             {
                 Vector2 delta = currentMousePos - _lastMousePos;
                 
-                _posVelocity = delta * _settings.DragSensitivity;
+                _posVelocity = delta * SettingsManager.Settings.DragSensitivity;
 
                 ApplyCubeMovement(_posVelocity.X, _posVelocity.Y);
                 _lastMousePos = currentMousePos;
@@ -310,7 +308,7 @@ public class Game : GameWindow
             if (_posVelocity.LengthSquared > 0.00001f)
             {
                 ApplyCubeMovement(_posVelocity.X, _posVelocity.Y);
-                _posVelocity *= _settings.Friction;
+                _posVelocity *= SettingsManager.Settings.Friction;
             }
         }
         
@@ -325,7 +323,7 @@ public class Game : GameWindow
             else
             {
                 Vector2 delta = currentMousePos - _lastMousePos;
-                _rotVelocity = delta * + _settings.RotSensitivity;
+                _rotVelocity = delta * + SettingsManager.Settings.RotSensitivity;
 
                 _cube.Transform.Rotation.Y += _rotVelocity.X;
                 _cube.Transform.Rotation.X += _rotVelocity.Y;
@@ -341,11 +339,20 @@ public class Game : GameWindow
             {
                 _cube.Transform.Rotation.Y += _rotVelocity.X;
                 _cube.Transform.Rotation.X += _rotVelocity.Y;
-                _rotVelocity *= _settings.Friction;
+                _rotVelocity *= SettingsManager.Settings.Friction;
             }
         }
         
         BounceCubeOffScreen();
+    }
+   
+    protected override void OnMouseWheel(MouseWheelEventArgs e)
+    {
+        base.OnMouseWheel(e);
+        
+        float zoomDelta = -e.OffsetY * SettingsManager.Settings.ZoomSensitivity; 
+
+        _camera.Fov -= zoomDelta;
     }
    
     private void ApplyCubeMovement(float deltaX, float deltaY)
@@ -405,25 +412,25 @@ public class Game : GameWindow
         if (minX < 0)
         {
             _viewportPosition.X -= minX;
-            _posVelocity.X = MathF.Abs(_posVelocity.X) * _settings.Restitution;
+            _posVelocity.X = MathF.Abs(_posVelocity.X) * SettingsManager.Settings.Restitution;
         }
 
         if (maxX > Size.X)
         {
             _viewportPosition.X -= maxX - Size.X;
-            _posVelocity.X = -MathF.Abs(_posVelocity.X) * _settings.Restitution;
+            _posVelocity.X = -MathF.Abs(_posVelocity.X) * SettingsManager.Settings.Restitution;
         }
 
         if (minY < 0)
         {
             _viewportPosition.Y += minY;
-            _posVelocity.Y = MathF.Abs(_posVelocity.Y) * _settings.Restitution;
+            _posVelocity.Y = MathF.Abs(_posVelocity.Y) * SettingsManager.Settings.Restitution;
         }
 
         if (maxY > Size.Y)
         {
             _viewportPosition.Y += maxY - Size.Y;
-            _posVelocity.Y = -MathF.Abs(_posVelocity.Y) * _settings.Restitution;
+            _posVelocity.Y = -MathF.Abs(_posVelocity.Y) * SettingsManager.Settings.Restitution;
         }
 
         GL.Viewport((int)_viewportPosition.X, (int)_viewportPosition.Y, Size.X, Size.Y);

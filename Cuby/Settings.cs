@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace MadEngine;
 
@@ -11,9 +10,12 @@ public class Settings
     public float DragSensitivity = 1f;
     public float Restitution = 0.8f;
     public float ZoomSensitivity = 1.0f;
+
+    public float MinZoom = 170f;
+    public float MaxZoom = 1f;
 }
 
-public static class SettingsSaver
+public static class SettingsManager
 {
     public static string Path = "settings.json";
 
@@ -23,6 +25,8 @@ public static class SettingsSaver
         IndentSize = 4,
         IncludeFields = true
     };
+
+    public static Settings Settings = Load();
     
     public static Settings Load()
     {
