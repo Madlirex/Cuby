@@ -126,7 +126,7 @@ public class Game : GameWindow
         };
         
         Mesh mesh = new Mesh(vertices, indices);
-        Material material = new Material(_unlitShader, new Texture("Textures/texture.jpg"), Vector4.One);
+        Material material = new Material(_unlitShader, new Texture(SettingsManager.Settings.GetRandomTexture()), Vector4.One);
         
         MeshRenderer meshRenderer = new MeshRenderer(mesh, material);
 

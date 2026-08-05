@@ -13,6 +13,14 @@ public class Settings
 
     public float MinZoom = 170f;
     public float MaxZoom = 1f;
+
+    public string[] TexturePaths = ["Textures/texture.jpg"];
+    
+    public string GetRandomTexture()
+    {
+        int index = Random.Shared.Next(0, TexturePaths.Length);
+        return TexturePaths[index];
+    }
 }
 
 public static class SettingsManager
