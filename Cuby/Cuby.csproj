@@ -39,9 +39,6 @@
       </Content>
       <None Remove="Textures\simkovicova.jpg" />
       <None Remove="Audio\background.wav" />
-      <Content Include="Audio\background.wav">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
       <None Remove="Textures\romana.jpg" />
       <Content Include="Textures\romana.jpg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
