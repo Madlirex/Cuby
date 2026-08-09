@@ -7,6 +7,7 @@
     "MinZoom": 170,
     "MaxZoom": 1,
     "TexturePaths": [
-        "Textures/texture.jpg"
+        "Textures/texture.jpg",
+        "Textures/house.jpg"
     ]
 }
