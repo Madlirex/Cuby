@@ -172,8 +172,8 @@ public class Game : GameWindow
     {
         base.OnLoad();
         
-        _camera.Width = Size.X;
-        _camera.Height = Size.Y;
+        _camera.Width = FramebufferSize.X;
+        _camera.Height = FramebufferSize.Y;
 
         foreach (GameObject gameObject in _scene)
         {
@@ -182,7 +182,7 @@ public class Game : GameWindow
         
         int x = (int)_viewportPosition.X;
         int y = (int)_viewportPosition.Y;
-        GL.Viewport(x, y, Size.X, Size.Y);
+        GL.Viewport(x, y, FramebufferSize.X, FramebufferSize.Y);
         
         GL.ClearColor(0f, 0f, 0f, 0f);
     }
@@ -190,11 +190,12 @@ public class Game : GameWindow
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
-        _camera.Width = e.Width;
-        _camera.Height = e.Height;
+        
+        _camera.Width = FramebufferSize.X;
+        _camera.Height = FramebufferSize.Y;
         int x = (int)_viewportPosition.X;
         int y = (int)_viewportPosition.Y;
-        GL.Viewport(x, y, e.Width, e.Height);
+        GL.Viewport(x, y, FramebufferSize.X, FramebufferSize.Y);
     }
 
     protected override unsafe void OnUnload()
@@ -237,16 +238,23 @@ public class Game : GameWindow
         _cube.MeshRenderer.Draw(view, projection);
         
         MouseState mouse = MouseState;
-        int mouseX = (int)mouse.X;
-        int mouseY = Size.Y - (int)mouse.Y; 
 
-        byte[] pixelAlpha = new byte[1];
-        if (mouseX >= 0 && mouseX < Size.X && mouseY >= 0 && mouseY < Size.Y)
+        float scaleX = FramebufferSize.X / (float)ClientSize.X;
+        float scaleY = FramebufferSize.Y / (float)ClientSize.Y;
+
+        int mouseX = (int)(mouse.X * scaleX);
+        int mouseY = FramebufferSize.Y - (int)(mouse.Y * scaleY);
+
+        bool inBounds = mouseX >= 0 && mouseX < FramebufferSize.X && mouseY >= 0 && mouseY < FramebufferSize.Y;
+        
+        byte[] pixelRgba = new byte[4];
+        if (inBounds)
         {
-            GL.ReadPixels(mouseX, mouseY, 1, 1, PixelFormat.Alpha, PixelType.UnsignedByte, pixelAlpha);
+            GL.ReadPixels(mouseX, mouseY, 1, 1, PixelFormat.Rgba, PixelType.UnsignedByte, pixelRgba);
         }
+        byte pixelAlpha0 = pixelRgba[3];
 
-        bool isHoveringObject = pixelAlpha[0] > 0;
+        bool isHoveringObject = pixelAlpha0 > 0;
         unsafe
         {
             bool shouldAcceptInput = isHoveringObject || _isDraggingWindow || _isRotatingCube;
@@ -362,7 +370,7 @@ public class Game : GameWindow
         
         int x = (int)_viewportPosition.X;
         int y = (int)_viewportPosition.Y;
-        GL.Viewport(x, y, Size.X, Size.Y);
+        GL.Viewport(x, y, FramebufferSize.X, FramebufferSize.Y);
     }
     
     private void BounceCubeOffScreen()
@@ -399,8 +407,8 @@ public class Game : GameWindow
 
             p /= p.W;
 
-            float screenX = (p.X * 0.5f + 0.5f) * Size.X + _viewportPosition.X;
-            float screenY = (1.0f - (p.Y * 0.5f + 0.5f)) * Size.Y - _viewportPosition.Y;
+            float screenX = (p.X * 0.5f + 0.5f) * FramebufferSize.X + _viewportPosition.X;
+            float screenY = (1.0f - (p.Y * 0.5f + 0.5f)) * FramebufferSize.Y - _viewportPosition.Y;
 
             minX = MathF.Min(minX, screenX);
             maxX = MathF.Max(maxX, screenX);
@@ -415,9 +423,9 @@ public class Game : GameWindow
             _posVelocity.X = MathF.Abs(_posVelocity.X) * SettingsManager.Settings.Restitution;
         }
 
-        if (maxX > Size.X)
+        if (maxX > FramebufferSize.X)
         {
-            _viewportPosition.X -= maxX - Size.X;
+            _viewportPosition.X -= maxX - FramebufferSize.X;
             _posVelocity.X = -MathF.Abs(_posVelocity.X) * SettingsManager.Settings.Restitution;
         }
 
@@ -427,12 +435,12 @@ public class Game : GameWindow
             _posVelocity.Y = MathF.Abs(_posVelocity.Y) * SettingsManager.Settings.Restitution;
         }
 
-        if (maxY > Size.Y)
+        if (maxY > FramebufferSize.Y)
         {
-            _viewportPosition.Y += maxY - Size.Y;
+            _viewportPosition.Y += maxY - FramebufferSize.Y;
             _posVelocity.Y = -MathF.Abs(_posVelocity.Y) * SettingsManager.Settings.Restitution;
         }
 
-        GL.Viewport((int)_viewportPosition.X, (int)_viewportPosition.Y, Size.X, Size.Y);
+        GL.Viewport((int)_viewportPosition.X, (int)_viewportPosition.Y, FramebufferSize.X, FramebufferSize.Y);
     }
 }
