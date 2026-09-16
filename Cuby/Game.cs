@@ -32,18 +32,34 @@ public class Game : GameWindow
     private unsafe Cursor* _grabCursor;
     private bool _wasHoveringObject;
     
-    public unsafe Game(string title) : base(new GameWindowSettings()
+    public static Game Create(string title)
     {
-        UpdateFrequency = 60
-    },
-        new NativeWindowSettings()
-    {
-        WindowState = WindowState.Maximized, 
-        Title = title,
-        WindowBorder = WindowBorder.Hidden,
-        TransparentFramebuffer = true,   
-        StartVisible = true,
-    })
+        var gameSettings = new GameWindowSettings() { UpdateFrequency = SettingsManager.Settings.Framerate };
+
+        var windowSettings = new NativeWindowSettings()
+        {
+            WindowState = WindowState.Maximized, 
+            Title = title,
+            WindowBorder = WindowBorder.Hidden,
+            TransparentFramebuffer = true,   
+            StartVisible = true,
+            APIVersion = new Version(3, 3),
+            Profile = ContextProfile.Core
+        };
+        
+        try
+        {
+            return new Game(gameSettings, windowSettings);
+        }
+        catch (GLFWException e)
+        {
+            Console.WriteLine($"GLFW Exception: {e.Message}");
+            windowSettings.Profile = ContextProfile.Any;
+            return new Game(gameSettings, windowSettings);
+        }
+    }
+    
+    public unsafe Game(GameWindowSettings gameSettings, NativeWindowSettings nativeSettings) : base(gameSettings, nativeSettings)
     {
         GLFW.SetWindowAttrib(WindowPtr, WindowAttribute.Floating, true);
         _litShader = new Shader("Shaders/shader.vert", "Shaders/lit.frag");

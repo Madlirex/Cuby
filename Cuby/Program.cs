@@ -4,9 +4,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        using (Game game = new Game("Cuby"))
-        {
-            game.Run();
-        }
+        using Game game = Game.Create("Cuby");
+        game.Run();
     }
 }
