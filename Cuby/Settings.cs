@@ -5,6 +5,8 @@ namespace MadEngine;
 [Serializable]
 public class Settings
 {
+    public int Framerate = 60;
+    
     public float Friction = 0.95f;
     public float RotSensitivity = 1.0f;
     public float DragSensitivity = 1f;
